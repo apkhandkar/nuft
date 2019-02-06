@@ -34,11 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef OLD_SIZE_FUNC
-#define WITHOUT_HEADERS 0
-#define WITH_HEADERS    1
-ssize_t ftpack_size(void *packet, int mode);
-#endif
+#define S(t) sizeof(t)
 
 typedef void * ftpack;
 
