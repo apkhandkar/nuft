@@ -12,13 +12,16 @@
 #ifndef FTPACKET_H
 #define FTPACKET_H
 
-typedef void * ftpack;
+/* this seems to be needed for uint8_t on clang */
+#include <stdlib.h>
 
-ftpack ftpack_create(uint8_t type, uint32_t snum, void *data, ssize_t size);
-ssize_t ftpack_psize(ftpack packet);
-ssize_t ftpack_dsize(ftpack packet);
-uint8_t ftpack_ptype(ftpack packet);
-void *ftpack_pdata(ftpack packet);
-void ftpack_free(ftpack packet);
+typedef void ftpack;
+
+ftpack *ftpack_create(uint8_t type, uint32_t snum, void *data, ssize_t size);
+ssize_t ftpack_psize(ftpack *packet);
+ssize_t ftpack_dsize(ftpack *packet);
+uint8_t ftpack_ptype(ftpack *packet);
+void *ftpack_pdata(ftpack *packet);
+void ftpack_free(ftpack *packet);
 
 #endif

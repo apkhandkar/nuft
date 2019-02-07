@@ -1,11 +1,10 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define S(t) sizeof(t)
 
 /* Seems fair to use a typedef here */ 
-typedef void * ftpack;
+typedef void ftpack;
  
 /* Byte offset corresponding to packet number */
 int SNUM_OFFSET = sizeof(uint8_t);
@@ -15,7 +14,7 @@ int SIZE_OFFSET = sizeof(uint8_t) + sizeof(uint32_t);
 int DATA_OFFSET = sizeof(uint8_t) + sizeof(uint32_t) + sizeof(ssize_t);
 
 ftpack 
-ftpack_create(uint8_t type, uint32_t num, void *data, ssize_t size)
+*ftpack_create(uint8_t type, uint32_t num, void *data, ssize_t size)
 {
   void *packdata;
 
@@ -38,22 +37,22 @@ ftpack_create(uint8_t type, uint32_t num, void *data, ssize_t size)
 }
 
 ssize_t 
-ftpack_psize(ftpack packet) 
+ftpack_psize(ftpack *packet) 
 { 
   return ((*(ssize_t*)(packet + SIZE_OFFSET)) + S(uint8_t) + S(uint32_t) + S(ssize_t)); 
 }
 
 ssize_t 
-ftpack_dsize(ftpack packet) { return (*(ssize_t*)(packet + SIZE_OFFSET)); }
+ftpack_dsize(ftpack *packet) { return (*(ssize_t*)(packet + SIZE_OFFSET)); }
 
 uint8_t 
-ftpack_ptype(ftpack packet) { return (uint8_t)*((uint8_t*) packet); }
+ftpack_ptype(ftpack *packet) { return (uint8_t)*((uint8_t*) packet); }
 
 uint32_t
-ftpack_snum(ftpack packet) { return (uint32_t)*((uint32_t*)(packet + SNUM_OFFSET)); }
+ftpack_snum(ftpack *packet) { return (uint32_t)*((uint32_t*)(packet + SNUM_OFFSET)); }
 
 void 
-*ftpack_pdata(ftpack packet) { return (packet + DATA_OFFSET); }
+*ftpack_pdata(ftpack *packet) { return (packet + DATA_OFFSET); }
 
 void 
-ftpack_free(ftpack packet) { return free(packet); }
+ftpack_free(ftpack *packet) { return free(packet); }
