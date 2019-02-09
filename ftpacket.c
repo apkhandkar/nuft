@@ -1,3 +1,40 @@
+/*
+
+  A 'packet' is a pointer to a block of allocated memory that
+  is initialised in a particular way. It is a composite type,
+  however, unlike any composite offered by the C language, it
+  can vary in size depending upon the size of its payload.
+
+  It consists of two parts: a header and the payload.
+  The header consists of three fields: packet type; which is
+  an unsigned integer with minimum width of 8 bits, sequence
+  number; an unsigned integer with minimum width of 32 bits,
+  and packet size; a signed size value which stores the size
+  of the payload that succeeds the header.
+
+  +------+------+------+-----------
+  |      |      |      |
+  | type | snum | size |    data  ......
+  |      |      |      |
+  +------+------+------+-----------
+   uint8  uint32 ssize
+
+  The minimum size of one such packet works out to be:
+  sizeof(uint8_t) +
+  sizeof(uint32_t) +
+  sizeof(ssize_t) +
+  1 byte (packet cannot be empty)
+  
+  The functions this file provides can be used to allocate 
+  and initialise such a packet in memory (ftpack_create),
+  free an allocated packet (ftpack_free) and return the values
+  for fields in the packet header (ftpack_dsize, 
+  ftpack_snum and ftpack_ptype), return size of the entire 
+  packet (ftpack_psize) and return a pointer to the data 
+  (payload) of the packet (ftpack_pdata).  
+
+*/
+
 #include <stdlib.h>
 #include <string.h>
 
