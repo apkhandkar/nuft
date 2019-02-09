@@ -36,6 +36,12 @@ ftpack
   return packdata;
 }
 
+/*
+ * these functions are fancy wrappers for pointer arithmetic and
+ * somewhat complicated casts, as such, they could be reworked
+ * into macro functions sometime in the future
+ */
+
 ssize_t 
 ftpack_psize(ftpack *packet) 
 { 
