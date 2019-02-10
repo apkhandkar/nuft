@@ -1,3 +1,6 @@
 nuft: "nu file transfer"
+This is a complete rewrite of the file transfer program (ft) over at 
+https://github.com/arjunk1997/msc/tree/master/ft with some alterations
+and much-needed improvements.
 
 A more detailed readme coming soon...
