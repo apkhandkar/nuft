@@ -78,7 +78,8 @@ ftpack
  * somewhat complicated casts, as such, they could be reworked
  * into macro functions sometime in the future
  *
- * 10/02/19: macros for the functions have been provided
+ * 10/02/19: macros for the functions have been provided in 
+ * ftpacket.h
  */
 
 ssize_t 
@@ -87,30 +88,18 @@ ftpack_psize(ftpack *packet)
   return ((*(ssize_t*)(packet + SIZE_OFFSET)) + S(uint8_t) + S(uint32_t) + S(ssize_t)); 
 }
 
-#define FTPACKET_PSIZE(p) \
-  ((*(ssize_t*)(p+SIZE_OFFSET))+S(uint8_t)+S(uint32_t)+S(ssize_t)
-
 ssize_t 
 ftpack_dsize(ftpack *packet) { return (*(ssize_t*)(packet + SIZE_OFFSET)); }
-
-#define FTPACK_DSIZE(p) (*(ssize_t*)(p+SIZE_OFFSET))
 
 uint8_t 
 ftpack_ptype(ftpack *packet) { return (uint8_t)*((uint8_t*) packet); }
 
-#define FTPACK_PTYPE(p) (uint8_t)*((uint8_t*)p)
-
 uint32_t
 ftpack_snum(ftpack *packet) { return (uint32_t)*((uint32_t*)(packet + SNUM_OFFSET)); }
-
-#define FTPACK_SNUM(p) (uint32_t)*((uint32_t*)(p+SNUM_OFFSET))
 
 void 
 *ftpack_pdata(ftpack *packet) { return (packet + DATA_OFFSET); }
 
-#define FTPACK_PDATA(p) (p+DATA_OFFSET)
-
 void 
 ftpack_free(ftpack *packet) { return free(packet); }
 
-#define FTPACK_FREE(p) free(p)
