@@ -18,15 +18,15 @@
 typedef void ftpack;
 
 #define FTPACKET_PSIZE(p) \
-  ((*(ssize_t*)(p+SIZE_OFFSET))+S(uint8_t)+S(uint32_t)+S(ssize_t)
+  ((*(ssize_t*)(p+sizeof(uint8_t)+sizeof(uint32_t)))+S(uint8_t)+S(uint32_t)+S(ssize_t)
 
-#define FTPACK_DSIZE(p) (*(ssize_t*)(p+SIZE_OFFSET))
+#define FTPACK_DSIZE(p) (*(ssize_t*)(p+sizeof(uint8_t)+sizeof(uint32_t)))
 
 #define FTPACK_PTYPE(p) (uint8_t)*((uint8_t*)p)
 
-#define FTPACK_SNUM(p) (uint32_t)*((uint32_t*)(p+SNUM_OFFSET))
+#define FTPACK_SNUM(p) (uint32_t)*((uint32_t*)(p+sizeof(uint8_t)))
 
-#define FTPACK_PDATA(p) (p+DATA_OFFSET)
+#define FTPACK_PDATA(p) (p+sizeof(uint8_t)+sizeof(uint32_t)+sizeof(ssize_t))
 
 #define FTPACK_FREE(p) free(p)
 
