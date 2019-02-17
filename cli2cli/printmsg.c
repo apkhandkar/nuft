@@ -15,7 +15,7 @@ printmsg(struct msg *mesg)
 	switch((*mesg).type) {
 		case 0:
 			/* 'newfile' message */
-			printf("Type: 'newfile'\n");
+			printf("Type: 'newfile' [Cli --> Cli]\n");
 			sscanf(((*mesg).ids), "%s %s", &id1, &id2);
 			sscanf(((*mesg).body), "%d %s", &lblk, &fname);
 			printf("Filename: %s\n", fname);
@@ -26,9 +26,17 @@ printmsg(struct msg *mesg)
 			break;
 		case 1:
 			/* 'listening' message */
-			printf("Type: 'listening'\n");
+			printf("Type: 'listening' [Cli --> Srv]\n");
 			sscanf(((*mesg).ids), "%s", &id1);
 			printf("Identity: %s\n", id1);
+			break;
+		case 2:
+			/* 'acknowledgement' message */
+			printf("Type: 'acknowledgement' [Cli --> Cli]\n");
+			sscanf((*mesg).ids, "%s %s", &id1, &id2);
+			printf("From: %s\n", id1);
+			printf("To: %s\n", id2);
+			printf("Asking for block #%d\n", (*mesg).blkno);
 			break;
 		default:
 			break;

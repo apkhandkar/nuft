@@ -51,11 +51,14 @@ main(int argc, char **argv)
 		n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&cliaddr, (socklen_t*)&len);
 
 		printf("---got a message from client---\n");
-		if((*recv_mesg).type == 0) {
+
+		if((*recv_mesg).type == 0 || (*recv_mesg).type == 2) {
 			add_to_queue(recv_mesg);
 			print_queue(0);
 		} else if((*recv_mesg).type == 1) {
 			/* a client has informed us he's listening for files */
+
+			printmsg(recv_mesg);
 
 			/* look for messages addressed to this client */
 			sscanf((*recv_mesg).ids, "%s", id);
@@ -74,7 +77,6 @@ main(int argc, char **argv)
 			print_queue(0);
 		}
 		
-		printmsg(recv_mesg);
 		printf("\n");
 	}
 	
