@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "cli2cli.h"
-#include "smsgqueue.h"
+#include "message_queue.h"
 #include "printmsg.h"
 
 int 
@@ -40,6 +40,7 @@ main(int argc, char **argv)
 
 	int len;
 	int n;
+	int msgq_index;
 
 	char id[64];
 
@@ -52,19 +53,25 @@ main(int argc, char **argv)
 		printf("---got a message from client---\n");
 		if((*recv_mesg).type == 0) {
 			add_to_queue(recv_mesg);
-			print_msgq();
+			print_queue(0);
 		} else if((*recv_mesg).type == 1) {
 			/* a client has informed us he's listening for files */
 
 			/* look for messages addressed to this client */
 			sscanf((*recv_mesg).ids, "%s", id);
 
-			if(getmsg_to(id) != NULL) {
-				if(sendto(sockfd, getmsg_to(id), sizeof(struct msg), 0, (struct sockaddr*)&cliaddr, len) < 0) {
+			if((msgq_index = get_mqindex_to(id)) >= 0) {
+				if(sendto(sockfd, get_message(msgq_index), sizeof(struct msg), 0, (struct sockaddr*)&cliaddr, len) < 0) {
 					perror("sendto");
 					return -1;
 				}
 			}
+
+			/* delete the message we just sent from the message queue */
+			delete_from_queue(msgq_index);
+			
+			printf("---deleted the message just relayed...\n");
+			print_queue(0);
 		}
 		
 		printmsg(recv_mesg);
