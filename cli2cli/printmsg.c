@@ -2,10 +2,9 @@
 #include "cli2cli.h"
 
 /**
- * printmsg - a function to help with debugging
- * prints the contents of a cli2cli message
+ * A function to help with debugging
+ * Prints the contents of a cli2cli message
  */
-
 void
 printmsg(struct msg *mesg)
 {
