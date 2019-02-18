@@ -102,12 +102,13 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		timeout.tv_usec = 250;
 
 		/* listen for messages that are addressed to us */
-		if(sendto(	sockfd,
-					list_mesg,
-					sizeof(struct msg),
-					0,
-					(const struct sockaddr*)&servaddr,
-					len) < 0) {
+		if(sendto(	
+			sockfd,
+			list_mesg,
+			sizeof(struct msg),
+			0,
+			(const struct sockaddr*)&servaddr,
+			len) < 0) {
 
 			perror("sendto - listen message");
 			return -1;
@@ -132,12 +133,13 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 			/* although sockfd is its only member, check to be sure */
 			if(FD_ISSET(sockfd, &recvset)) {
 	
-				n = recvfrom(	sockfd, 
-								recv_mesg, 
-								sizeof(struct msg), 
-								0, 
-								(struct sockaddr*)&servaddr, 
-								&len);	
+				n = recvfrom(	
+					sockfd, 
+					recv_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(struct sockaddr*)&servaddr, 
+					&len);	
 
 				if((*recv_mesg).type == 2) {
 
@@ -162,12 +164,13 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 				}
 
 				/* send response */
-				if(sendto(	sockfd, 
-							send_mesg, 
-							sizeof(struct msg), 
-							0, 
-							(struct sockaddr*)&servaddr, 
-							len) < 0) {
+				if(sendto(	
+					sockfd, 
+					send_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(struct sockaddr*)&servaddr, 
+					len) < 0) {
 
 					perror("sendto");
 					return -1;
@@ -233,12 +236,13 @@ receive_files(int port, char *ident)
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 250;
 	
-		if(sendto(	sockfd, 
-					list_mesg, 
-					sizeof(struct msg), 
-					0, 
-					(const struct sockaddr*)&servaddr, 
-					len) < 0) {
+		if(sendto(	
+			sockfd, 
+			list_mesg, 
+			sizeof(struct msg), 
+			0, 
+			(const struct sockaddr*)&servaddr, 
+			len) < 0) {
 
 			perror("sendto");
 			return -1;
@@ -258,12 +262,13 @@ receive_files(int port, char *ident)
 
 			if(FD_ISSET(sockfd, &recvset)) {
 
-				n = recvfrom(	sockfd, 
-								recv_mesg, 
-								sizeof(struct msg), 
-								0, 
-								(struct sockaddr*)&servaddr, 
-								&len);	
+				n = recvfrom(	
+					sockfd, 
+					recv_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(struct sockaddr*)&servaddr, 
+					&len);	
 
 				if((*recv_mesg).type == 0) {
 					blkno = 1;	
@@ -330,12 +335,13 @@ receive_files(int port, char *ident)
 				sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
 
 				/* send response */
-				if(sendto(	sockfd, 
-							send_mesg, 
-							sizeof(struct msg), 
-							0, 
-							(const struct sockaddr*)&servaddr, 
-							len) < 0) {
+				if(sendto(	
+					sockfd, 
+					send_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(const struct sockaddr*)&servaddr, 
+					len) < 0) {
 
 					perror("sendto");
 					return -1;

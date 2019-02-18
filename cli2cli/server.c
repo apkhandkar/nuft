@@ -48,12 +48,13 @@ main(int argc, char **argv)
 	
 		len = sizeof(cliaddr);
 
-		n = recvfrom(	sockfd, 
-						recv_mesg, 
-						sizeof(struct msg), 
-						0, 
-						(struct sockaddr*)&cliaddr, 
-						(socklen_t*)&len);
+		n = recvfrom(	
+			sockfd, 
+			recv_mesg, 
+			sizeof(struct msg), 
+			0, 
+			(struct sockaddr*)&cliaddr, 
+			(socklen_t*)&len);
 
 		if(	(*recv_mesg).type == 0 || (*recv_mesg).type == 2 || 
 			(*recv_mesg).type == 3 || (*recv_mesg).type == 4 ){
@@ -120,12 +121,13 @@ main(int argc, char **argv)
 			/* if such a message exists, send it to the client */
 			if((msgq_index = get_mqindex_to(id1)) >= 0) {
 
-				if(sendto(	sockfd, 
-							get_message(msgq_index),	/* retrieve the message from queue */ 
-							sizeof(struct msg), 
-							0, 
-							(struct sockaddr*)&cliaddr, 
-							len) < 0) {
+				if(sendto(	
+					sockfd, 
+					get_message(msgq_index),	/* retrieve the message from queue */ 
+					sizeof(struct msg), 
+					0, 
+					(struct sockaddr*)&cliaddr, 
+					len) < 0) {
 
 					perror("sendto");
 					return -1;
