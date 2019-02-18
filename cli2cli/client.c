@@ -1,5 +1,4 @@
 #include <math.h>
-#include <poll.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -133,7 +132,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 */
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
-			perror("poll");
+			perror("select");
 			return -1;
 
 		} else if(are_ready == 0) {
