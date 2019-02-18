@@ -72,12 +72,12 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	sprintf(((*init_mesg).body), "%d %s", lblk, fname);
 
 	if(sendto(	
-			sockfd,
-			init_mesg,
-			sizeof(struct msg),
-			0,
-			(const struct sockaddr*)&servaddr,
-			len) < 0) {
+		sockfd,
+		init_mesg,
+		sizeof(struct msg),
+		0,
+		(const struct sockaddr*)&servaddr,
+		len) < 0) {
 
 		perror("sendto - init message");
 		return -1;
