@@ -38,6 +38,21 @@ printmsg(struct msg *mesg)
 			printf("To: %s\n", id2);
 			printf("Asking for block #%d\n", (*mesg).blkno);
 			break;
+		case 3:
+			/* file block */
+			printf("Type: file block, 1024 bytes [Cli --> Cli]\n");
+			sscanf((*mesg).ids, "%s %s", &id1, &id2);
+			printf("From: %s\n", id1);
+			printf("To: %s\n", id2);
+			printf("Block #%d\n", (*mesg).blkno);
+			break;
+		case 4:
+			/* 'completed' message */
+			printf("Type: 'transfer completed' [Cli --> Cli]\n");
+			sscanf((*mesg).ids, "%s %s", &id1, &id2);
+			printf("From: %s\n", id1);
+			printf("To: %s\n", id2);
+			break;
 		default:
 			break;
 	}

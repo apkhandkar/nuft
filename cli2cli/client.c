@@ -79,16 +79,16 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
 	struct msg *list_mesg = (struct msg*) malloc(sizeof(struct msg));
+	struct msg *send_mesg = (struct msg*) malloc(sizeof(struct msg));
+
 	(*list_mesg).type = 1;
 	sprintf((*list_mesg).ids, "%s", my_ident);
 
 	struct timeval timeout;
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 250;
+
+	FD_SET(sockfd, &recvset);
 
 	while(1) {
-
-		
 
 		/* do not trust select() to keep contents of timeout unchanged */
 		timeout.tv_sec = 0;
@@ -101,18 +101,16 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		}
 
 		/* ping server for a response from recipient */
-		are_ready = select(sockfd+1, &recvset, NULL, NULL, &timeout);
-		
-		if(are_ready == 0) {
-
-			/* no response, keep waiting... */
-			/* put sockfd back in our fdset */
-			FD_SET(sockfd, &recvset);
-
-		} else if(are_ready == -1) {
+		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
 			perror("select");
 			return -1;
+
+		} else if(are_ready == 0) {
+
+			/* no response, ping again... */
+			/* put sockfd back in our fdset */
+			FD_SET(sockfd, &recvset);
 
 		} else {
 
@@ -129,9 +127,30 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 					/* next block is being requested */
 
 					printf("Was acknowledged...\n");
+
+					/* set seek to the start of the requested block */
+					lseek(fd, (((*recv_mesg).blkno - 1) * 1024), SEEK_SET);
+
+					/* build message */
+					(*send_mesg).type = 3;
+					(*send_mesg).blkno = (*recv_mesg).blkno;
+					sprintf((*send_mesg).ids, "%s %s", my_ident, to_ident);
+					read(fd, (*send_mesg).body, 1024);
+					
+				} else if((*recv_mesg).type == 4) {
+
+					/* file transfer completed */
+					printf("File transfer completed\n");
+					return 0;
+
 				}
 
-				return 0;
+				/* send response */
+				if(sendto(sockfd, send_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, len) < 0) {
+					perror("sendto");
+					return -1;
+				}
+
 			}
 		}
 
@@ -146,6 +165,12 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 int
 receive_files(int port, char *ident)
 {
+	/*******/
+	fd_set recvset;
+	FD_ZERO(&recvset);
+	int are_ready; 
+	/*******/
+
 	printf("Listening for files via relayserver at port %d as @%s\n", port, ident);
 
 	int sockfd, len, n;
@@ -174,44 +199,113 @@ receive_files(int port, char *ident)
 	char fname[1024];
 	int nblk, lblk;
 	int blkno;
+	int fd;
+
+	struct timeval timeout;
+
+	FD_SET(sockfd, &recvset);
 
 	while(1) {
+
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 250;
 	
-		/* listen for files... */
 		if(sendto(sockfd, list_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
 			perror("sendto");
 			return -1;
 		}
 
-		n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, &len);	
-
-		if((*recv_mesg).type == 0) {
-			blkno = 1;	
-
-			/* save the identity of the fellow sending us the file */
-			sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
-			/* save the details of the file */
-			nblk = (*recv_mesg).blkno;
-			sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
-	
-			printf("***INCOMING: %s is sending us '%s' (~%dKiB)\n", sender_ident, fname, nblk);
-
-			/* send acknowledgement to the sender */
-			/* i.e., ask for block #1 of the file */
-			/* I'm inventing this 'protocol' as I go along (._.') */
-			(*send_mesg).type = 2;
-			(*send_mesg).blkno = blkno;
-			sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
+		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 			
+			perror("select");
+			return -1;
+
+		} else if(are_ready == 0) {
+
+			FD_SET(sockfd, &recvset);
+
+		} else {
+
+			if(FD_ISSET(sockfd, &recvset)) {
+
+				n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, &len);	
+
+				if((*recv_mesg).type == 0) {
+					blkno = 1;	
+
+					/* save the identity of the fellow sending us the file */
+					sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
+					/* save the details of the file */
+					nblk = (*recv_mesg).blkno;
+					sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
+	
+					printf("***INCOMING: %s is sending us '%s' (~%dKiB)\n", sender_ident, fname, nblk);
+
+					/* create the file locally */
+					fd = open(fname, O_CREAT|O_WRONLY, 0644);			
+	
+					/* send acknowledgement to the sender */
+					/* i.e., ask for block #1 of the file */
+					/* I'm inventing this 'protocol' as I go along (._.') */
+					(*send_mesg).type = 2;
+			
+				} else if((*recv_mesg).type == 3) {
+
+					/* check if the block was the requested block */
+					if((*recv_mesg).blkno == blkno) {
+	
+						if(blkno == nblk) {
+	
+							printf("Got the last block\n");
+												
+							/* write the last block and wrap up */
+							write(fd, (*recv_mesg).body, lblk);
+							/* file transfer finished */
+							(*send_mesg).type = 4;
+	
+						} else {
+				
+							printf("Got the block that was requested\n");
+						
+							/* write the block, ask for next block, etc. */
+							write(fd, (*recv_mesg).body, 1024);
+							blkno += 1;
+
+							(*send_mesg).type = 2;
+
+						}
+
+					} else {
+
+						printf("Didn't get the block that was requested\n");
+				
+						/* ask for the same block again */
+						(*send_mesg).type = 2;
+					}
+					
+				}
+
+				/* build response */
+				(*send_mesg).blkno = blkno;
+				sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
+
+				/* send response */
+				if(sendto(sockfd, send_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
+					perror("sendto");
+					return -1;
+				}
+
+				/* if file was sent, we're done */
+				if((*send_mesg).type == 4) {
+					printf("Finished transfer.\n");
+					return 0;
+				}
+			}
+
 		}
 
-		/* send response */
-		if(sendto(sockfd, send_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
-			perror("sendto");
-			return -1;
-		}
 	
-		return 0;
+		//return 0;
 	}
 
 	return 0;

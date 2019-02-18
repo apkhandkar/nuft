@@ -52,7 +52,8 @@ main(int argc, char **argv)
 
 		printf("---got a message from client---\n");
 
-		if((*recv_mesg).type == 0 || (*recv_mesg).type == 2) {
+		if(	(*recv_mesg).type == 0 || (*recv_mesg).type == 2 || 
+			(*recv_mesg).type == 3 || (*recv_mesg).type == 4 ){
 			add_to_queue(recv_mesg);
 			print_queue(0);
 		} else if((*recv_mesg).type == 1) {
