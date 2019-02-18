@@ -1,4 +1,5 @@
 #include <math.h>
+#include <poll.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -100,6 +101,8 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * On Linux, it seems to modify timeout to reflect the amount of
 		 * time not slept; on Mac OSX/BSD it keeps timeout unchanged but 
 		 * advises programmers not to rely on that fact...!!!
+		 * 
+		 * todo: Try rewriting this with poll() 
 		 */
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 250;
@@ -125,10 +128,12 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * and the program goes into a limbo. 
 		 * We wait 250 microseconds for a response, and if there 
 		 * isn't any, we resend the 'listen' message.
+		 *
+		 * Polling is achieved by select()
 		 */
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
-			perror("select");
+			perror("poll");
 			return -1;
 
 		} else if(are_ready == 0) {
