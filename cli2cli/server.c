@@ -68,11 +68,11 @@ main(int argc, char **argv)
 			 * A client-to-client message will [roughly] follow
 			 * this path:
 			 * 
-			 *	Client [Sender] -->
-			 *		Server =(adds to)=>
-			 * 			Server Message Queue 
-		  	 *				=(retrieved from)=> Server -->
-			 * 					Client [Recipient]
+			 * Client [Sender] -->
+			 *     Server =(adds to)=>
+			 * 	       Server Message Queue 
+		  	 *		       =(retrieved from)=> Server -->
+			 * 			       Client [Recipient]
 			 */
 			add_to_queue(recv_mesg);
 

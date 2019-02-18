@@ -16,11 +16,9 @@ int
 send_file(int port, char *fname, char *my_ident, char *to_ident) 
 {
 
-	/*******/
 	fd_set recvset;
 	FD_ZERO(&recvset);
 	int are_ready; 
-	/*******/
 
 	printf("Sending file: %s\n", fname);
 	printf("via relayserver @ port %d\n", port);
@@ -97,7 +95,12 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 	while(1) {
 
-		/* do not trust select() to keep contents of timeout unchanged */
+		/**
+		 * Do not trust select() to keep the contents of timeout intact.
+		 * On Linux, it seems to modify timeout to reflect the amount of
+		 * time not slept; on Mac OSX/BSD it keeps timeout unchanged but 
+		 * advises programmers not to rely on that fact...!!!
+		 */
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 250;
 
@@ -115,7 +118,14 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 		}
 
-		/* ping server for a response from recipient */
+		/**
+		 * Polling the server for messages seems to be necessary.
+		 * Without it if a 'listen' message isn't responded to by
+		 * the server, the recvfrom() blocks the client execution
+		 * and the program goes into a limbo. 
+		 * We wait 250 microseconds for a response, and if there 
+		 * isn't any, we resend the 'listen' message.
+		 */
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
 			perror("select");
@@ -158,7 +168,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 				} else if((*recv_mesg).type == 4) {
 
 					/* file transfer completed */
-					printf("File transfer completed\n");
+					printf("File transfer completed.\n");
 					return 0;
 
 				}
@@ -178,6 +188,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 				}
 
 			}
+
 		}
 
 
@@ -191,11 +202,10 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 int
 receive_files(int port, char *ident)
 {
-	/*******/
+
 	fd_set recvset;
 	FD_ZERO(&recvset);
 	int are_ready; 
-	/*******/
 
 	printf("Listening for files via relayserver at port %d as @%s\n", port, ident);
 
@@ -299,8 +309,6 @@ receive_files(int port, char *ident)
 	
 						if(blkno == nblk) {
 	
-							printf("Got the last block\n");
-												
 							/* write the last block and wrap up */
 							write(fd, (*recv_mesg).body, lblk);
 
@@ -310,8 +318,6 @@ receive_files(int port, char *ident)
 	
 						} else {
 				
-							printf("Got the block that was requested\n");
-						
 							/* write the block, ask for next block, etc. */
 							write(fd, (*recv_mesg).body, 1024);
 							blkno += 1;
@@ -321,8 +327,6 @@ receive_files(int port, char *ident)
 						}
 
 					} else {
-
-						printf("Didn't get the block that was requested\n");
 				
 						/* ask for the same block again */
 						(*send_mesg).type = 2;

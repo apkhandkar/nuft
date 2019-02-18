@@ -11,10 +11,3 @@ mq_test: message_queue_test.c message_queue.h message_queue.o printmsg.o printms
 
 message_queue.o : message_queue.c message_queue.h printmsg.o cli2cli.h printmsg.h 
 	$(CC) -c message_queue.c
-
-printmsg.o: printmsg.c cli2cli.h
-	$(CC) -c printmsg.c
-
-smsgqueue.o: smsgqueue.c cli2cli.h printmsg.h smsgqueue.h
-	$(CC) -c smsgqueue.c
-
