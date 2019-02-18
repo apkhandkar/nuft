@@ -166,6 +166,7 @@ delete_from_queue(int at_index)
  * 0 - Forwards
  * 1 - Backwards (to test integrity of backlinks)
  */
+/*
 void
 print_queue(int direction)
 {
@@ -188,4 +189,4 @@ print_queue(int direction)
 	}	
 	printf("---------/Printing Message Queue----------\n");
 }
-
+*/

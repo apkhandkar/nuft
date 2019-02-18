@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include "cli2cli.h"
 #include "message_queue.h"
-#include "printmsg.h"
 
 int 
 main(int argc, char **argv)

@@ -11,7 +11,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "cli2cli.h"
-#include "printmsg.h"
 
 int 
 send_file(int port, char *fname, char *my_ident, char *to_ident) 
@@ -298,6 +297,7 @@ receive_files(int port, char *ident)
 												
 							/* write the last block and wrap up */
 							write(fd, (*recv_mesg).body, lblk);
+
 							/* file transfer finished */
 							(*send_mesg).type = 4;
 							sprintf((*send_mesg).body, "%s", fname);
@@ -346,12 +346,11 @@ receive_files(int port, char *ident)
 					printf("Finished transfer.\n");
 					return 0;
 				}
+
 			}
 
 		}
 
-	
-		//return 0;
 	}
 
 	return 0;
