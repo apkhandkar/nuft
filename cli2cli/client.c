@@ -72,9 +72,16 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	sprintf(((*init_mesg).ids), "%s %s", my_ident, to_ident);
 	sprintf(((*init_mesg).body), "%d %s", lblk, fname);
 
-	if(sendto(sockfd, init_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
+	if(sendto(	sockfd, 
+				init_mesg, 
+				sizeof(struct msg), 
+				0, 
+				(const struct sockaddr*)&servaddr, 
+				len) < 0) {
+
 		perror("sendto - init message");
 		return -1;
+
 	}
 
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
@@ -95,9 +102,16 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		timeout.tv_usec = 250;
 
 		/* listen for messages that are addressed to us */
-		if(sendto(sockfd, list_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
+		if(sendto(	sockfd, 
+					list_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(const struct sockaddr*)&servaddr, 
+					len) < 0) {
+
 			perror("sendto - listen message");
 			return -1;
+
 		}
 
 		/* ping server for a response from recipient */
@@ -118,15 +132,17 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 			/* although sockfd is its only member, check to be sure */
 			if(FD_ISSET(sockfd, &recvset)) {
 	
-				printf("got reply\n");
-				n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, &len);	
+				n = recvfrom(	sockfd, 
+								recv_mesg, 
+								sizeof(struct msg), 
+								0, 
+								(struct sockaddr*)&servaddr, 
+								&len);	
 
 				if((*recv_mesg).type == 2) {
 
 					/* previous messsage was acknowledged */
 					/* next block is being requested */
-
-					printf("Was acknowledged...\n");
 
 					/* set seek to the start of the requested block */
 					lseek(fd, (((*recv_mesg).blkno - 1) * 1024), SEEK_SET);
@@ -146,9 +162,16 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 				}
 
 				/* send response */
-				if(sendto(sockfd, send_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, len) < 0) {
+				if(sendto(	sockfd, 
+							send_mesg, 
+							sizeof(struct msg), 
+							0, 
+							(struct sockaddr*)&servaddr, 
+							len) < 0) {
+
 					perror("sendto");
 					return -1;
+
 				}
 
 			}
@@ -210,9 +233,16 @@ receive_files(int port, char *ident)
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 250;
 	
-		if(sendto(sockfd, list_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
+		if(sendto(	sockfd, 
+					list_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(const struct sockaddr*)&servaddr, 
+					len) < 0) {
+
 			perror("sendto");
 			return -1;
+
 		}
 
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
@@ -228,7 +258,12 @@ receive_files(int port, char *ident)
 
 			if(FD_ISSET(sockfd, &recvset)) {
 
-				n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&servaddr, &len);	
+				n = recvfrom(	sockfd, 
+								recv_mesg, 
+								sizeof(struct msg), 
+								0, 
+								(struct sockaddr*)&servaddr, 
+								&len);	
 
 				if((*recv_mesg).type == 0) {
 					blkno = 1;	
@@ -239,7 +274,10 @@ receive_files(int port, char *ident)
 					nblk = (*recv_mesg).blkno;
 					sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
 	
-					printf("***INCOMING: %s is sending us '%s' (~%dKiB)\n", sender_ident, fname, nblk);
+					printf("***INCOMING: %s is sending us '%s' (~%dKiB)\n", 
+						sender_ident, 
+						fname, 
+						nblk);
 
 					/* create the file locally */
 					fd = open(fname, O_CREAT|O_WRONLY, 0644);			
@@ -291,9 +329,16 @@ receive_files(int port, char *ident)
 				sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
 
 				/* send response */
-				if(sendto(sockfd, send_mesg, sizeof(struct msg), 0, (const struct sockaddr*)&servaddr, len) < 0) {
+				if(sendto(	sockfd, 
+							send_mesg, 
+							sizeof(struct msg), 
+							0, 
+							(const struct sockaddr*)&servaddr, 
+							len) < 0) {
+
 					perror("sendto");
 					return -1;
+
 				}
 
 				/* if file was sent, we're done */
