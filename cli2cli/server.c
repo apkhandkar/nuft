@@ -62,13 +62,6 @@ main(int argc, char **argv)
 			/**
 			 * These are client-to-client messages.
 			 *
-			 * ID |	Type			  |	From   | To
-			 * ---+-------------------+--------+-------
-			 * 0  |	'newfile'		  |	Client | Client
-			 * 2  |	'acknowledgement' |	Client | Client
-			 * 3  |	file block		  |	Client | Client
-			 * 4  |	'completed'		  |	Client | Client
-			 *  
 			 * Our job as the server is to simply add them to the
 			 * message queue.
 			 *
@@ -106,10 +99,6 @@ main(int argc, char **argv)
 			 * and if so, we send him the first message in the queue
 			 * for him. 
 			 *
-			 * ID |	Type			  |	From   | To
-			 * ---+-------------------+--------+-------
-			 * 1  |	'listening'		  |	Client | Server
-			 * 
 			 * If there are no messages for the client, we do not 
 			 * send any response.
 			 */
