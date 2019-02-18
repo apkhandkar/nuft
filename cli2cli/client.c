@@ -262,6 +262,7 @@ receive_files(int port, char *ident)
 							write(fd, (*recv_mesg).body, lblk);
 							/* file transfer finished */
 							(*send_mesg).type = 4;
+							sprintf((*send_mesg).body, "%s", fname);
 	
 						} else {
 				

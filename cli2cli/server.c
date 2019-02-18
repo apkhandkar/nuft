@@ -34,7 +34,7 @@ main(int argc, char **argv)
 		return -1;
 	}
 
-	printf("Started relay server at port %d\n", port);
+	printf("Started relay server at port %d\n\n", port);
 	
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
 
@@ -42,7 +42,8 @@ main(int argc, char **argv)
 	int n;
 	int msgq_index;
 
-	char id[64];
+	char id1[64], id2[64], fname[512];
+	int lblk;
 
 	while(1) {
 	
@@ -82,14 +83,18 @@ main(int argc, char **argv)
 			 */
 			add_to_queue(recv_mesg);
 
-			/**
-			 * Do a bit of snooping around to print status messages
-			 * 
-			 * Messages that announce new transfers (type 0) are 
-			 * checked for.
-			 */
+			/* announce new transfers */
 			if((*recv_mesg).type == 0) {
-				printf("\nA new transfer is starting...\n");
+
+				sscanf((*recv_mesg).ids, "%s %s", &id1, &id2);
+				sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
+
+				printf("     [New Transfer] from:%s to:%s file:%s size:~%dKiB\n",
+					id1,
+					id2,
+					fname,
+					(*recv_mesg).blkno);
+
 			}
 
 		} else if((*recv_mesg).type == 1) {
@@ -110,11 +115,11 @@ main(int argc, char **argv)
 			 */
 
 			/* retrieve client identity */
-			sscanf((*recv_mesg).ids, "%s", id);
+			sscanf((*recv_mesg).ids, "%s", id1);
 	
 			/* get the first message from the queue addressed to the client */
 			/* if such a message exists, send it to the client */
-			if((msgq_index = get_mqindex_to(id)) >= 0) {
+			if((msgq_index = get_mqindex_to(id1)) >= 0) {
 
 				if(sendto(	sockfd, 
 							get_message(msgq_index),	/* retrieve the message from queue */ 
@@ -128,13 +133,23 @@ main(int argc, char **argv)
 
 				}
 
+				/* announce completed transfers */
+				if((*(get_message(msgq_index))).type == 4) {
+
+					sscanf((*(get_message(msgq_index))).ids, "%s %s", id1, id2);
+					sscanf((*(get_message(msgq_index))).body, "%s", fname);
+		
+					printf("[Finished Transfer] from:%s to:%s file:%s\n", id2, id1, fname);
+
+				}			
+
 				/* delete the message we just sent from the message queue */
 				delete_from_queue(msgq_index);
 
 			} else {
 
 				/* there were no messages addressed to the client in the queue */
-				/* do nothing */
+				/* do nothing; the client will come back again to check anyway */
 
 			}
 
