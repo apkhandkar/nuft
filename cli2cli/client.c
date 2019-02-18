@@ -373,9 +373,24 @@ main(int argc, char **argv)
 
 	if(!strcmp(argv[1], "-s") && argc == 6) {
 
+		if(strlen(argv[3]) > 512 || strlen(argv[4]) > 63 || strlen(argv[5]) > 63) {
+		
+			printf("note: IDs can't be longer than 63 characters\n");
+			printf("also: Filenames can't be longer than 512 characters\n");
+			return -1;
+
+		}
+
 		send_file(atoi(argv[2]), argv[3], argv[4], argv[5]);
 
 	} else if(!strcmp(argv[1], "-r") && argc == 4) {
+
+		if(strlen(argv[3]) > 63) {
+		
+			printf("note: id's can be up to 63 characters long\n");
+			return -1;
+
+		}
 
 		receive_files(atoi(argv[2]), argv[3]);
 
