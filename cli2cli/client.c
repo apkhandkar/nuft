@@ -71,11 +71,11 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	sprintf(((*init_mesg).ids), "%s %s", my_ident, to_ident);
 	sprintf(((*init_mesg).body), "%d %s", lblk, fname);
 
-	if(sendto(	sockfd, 
-				init_mesg, 
-				sizeof(struct msg), 
-				0, 
-				(const struct sockaddr*)&servaddr, 
+	if(sendto(	sockfd,
+				init_mesg,
+				sizeof(struct msg),
+				0,
+				(const struct sockaddr*)&servaddr,
 				len) < 0) {
 
 		perror("sendto - init message");
@@ -101,11 +101,11 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		timeout.tv_usec = 250;
 
 		/* listen for messages that are addressed to us */
-		if(sendto(	sockfd, 
-					list_mesg, 
-					sizeof(struct msg), 
-					0, 
-					(const struct sockaddr*)&servaddr, 
+		if(sendto(	sockfd,
+					list_mesg,
+					sizeof(struct msg),
+					0,
+					(const struct sockaddr*)&servaddr,
 					len) < 0) {
 
 			perror("sendto - listen message");
