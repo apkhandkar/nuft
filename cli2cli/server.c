@@ -34,7 +34,7 @@ main(int argc, char **argv)
 		return -1;
 	}
 
-	printf("started relay server at port %d\n", port);
+	printf("Started relay server at port %d\n", port);
 	
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
 
@@ -44,41 +44,102 @@ main(int argc, char **argv)
 
 	char id[64];
 
-	/* start serving client requests */
 	while(1) {
 	
 		len = sizeof(cliaddr);
-		n = recvfrom(sockfd, recv_mesg, sizeof(struct msg), 0, (struct sockaddr*)&cliaddr, (socklen_t*)&len);
 
-		printf("---got a message from client---\n");
+		n = recvfrom(	sockfd, 
+						recv_mesg, 
+						sizeof(struct msg), 
+						0, 
+						(struct sockaddr*)&cliaddr, 
+						(socklen_t*)&len);
 
 		if(	(*recv_mesg).type == 0 || (*recv_mesg).type == 2 || 
 			(*recv_mesg).type == 3 || (*recv_mesg).type == 4 ){
+
+			/**
+			 * These are client-to-client messages.
+			 *
+			 * ID |	Type			  |	From   | To
+			 * ---+-------------------+--------+-------
+			 * 0  |	'newfile'		  |	Client | Client
+			 * 2  |	'acknowledgement' |	Client | Client
+			 * 3  |	file block		  |	Client | Client
+			 * 4  |	'completed'		  |	Client | Client
+			 *  
+			 * Our job as the server is to simply add them to the
+			 * message queue.
+			 *
+			 * A client-to-client message will [roughly] follow
+			 * this path:
+			 * 
+			 *	Client [Sender] -->
+			 *		Server =(adds to)=>
+			 * 			Server Message Queue 
+		  	 *				=(retrieved from)=> Server -->
+			 * 					Client [Recipient]
+			 */
 			add_to_queue(recv_mesg);
-			print_queue(0);
-		} else if((*recv_mesg).type == 1) {
-			/* a client has informed us he's listening for files */
 
-			printmsg(recv_mesg);
-
-			/* look for messages addressed to this client */
-			sscanf((*recv_mesg).ids, "%s", id);
-
-			if((msgq_index = get_mqindex_to(id)) >= 0) {
-				if(sendto(sockfd, get_message(msgq_index), sizeof(struct msg), 0, (struct sockaddr*)&cliaddr, len) < 0) {
-					perror("sendto");
-					return -1;
-				}
+			/**
+			 * Do a bit of snooping around to print status messages
+			 * 
+			 * Messages that announce new transfers (type 0) are 
+			 * checked for.
+			 */
+			if((*recv_mesg).type == 0) {
+				printf("\nA new transfer is starting...\n");
 			}
 
-			/* delete the message we just sent from the message queue */
-			delete_from_queue(msgq_index);
-			
-			printf("---deleted the message just relayed...\n");
-			print_queue(0);
+		} else if((*recv_mesg).type == 1) {
+
+			/**
+			 * A client has sent us a 'listening' message.
+			 * With it, he will send his identity. We have to check
+			 * if our queue contains any messages addressed to him,
+			 * and if so, we send him the first message in the queue
+			 * for him. 
+			 *
+			 * ID |	Type			  |	From   | To
+			 * ---+-------------------+--------+-------
+			 * 1  |	'listening'		  |	Client | Server
+			 * 
+			 * If there are no messages for the client, we do not 
+			 * send any response.
+			 */
+
+			/* retrieve client identity */
+			sscanf((*recv_mesg).ids, "%s", id);
+	
+			/* get the first message from the queue addressed to the client */
+			/* if such a message exists, send it to the client */
+			if((msgq_index = get_mqindex_to(id)) >= 0) {
+
+				if(sendto(	sockfd, 
+							get_message(msgq_index),	/* retrieve the message from queue */ 
+							sizeof(struct msg), 
+							0, 
+							(struct sockaddr*)&cliaddr, 
+							len) < 0) {
+
+					perror("sendto");
+					return -1;
+
+				}
+
+				/* delete the message we just sent from the message queue */
+				delete_from_queue(msgq_index);
+
+			} else {
+
+				/* there were no messages addressed to the client in the queue */
+				/* do nothing */
+
+			}
+
 		}
 		
-		printf("\n");
 	}
 	
 	return 0;	
