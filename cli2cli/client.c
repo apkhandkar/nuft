@@ -147,8 +147,8 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * Time taken to transfer a ~945MiB file between two clients via
 		 * relay server on the same device:
 		 * 
-		 *	select() waits 250us: ~ 7'30" (unacceptable)	
-		 * 	select() waits 100us: ~ 4'01" (somewhat okay)
+		 *	select() waits 250us: ~ 00:07:30 (unacceptable)	
+		 * 	select() waits 100us: ~ 00:04:01 (somewhat okay)
 		 */
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
