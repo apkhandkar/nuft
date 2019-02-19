@@ -125,8 +125,11 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * Without it if a 'listen' message isn't responded to by
 		 * the server, the recvfrom() blocks the client execution
 		 * and the program goes into a limbo. 
-		 * We check for a response, and if there isn't any, we 
+		 * We wait 100us for a response and if there isn't any we 
 		 * resend the 'listen' message.
+		 *
+		 * Reducing the interval below 100us could flood the 
+		 * server with an excessive amount of 'listen' messages.
 		 *
 		 * Polling is achieved by select()
 		 */
