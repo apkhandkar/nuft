@@ -185,7 +185,7 @@ char
 
 		if(!strcmp((*temp).from, from)) {
 
-			return &((*temp).fname);
+			return (char*) &((*temp).fname);
 
 		}
 
@@ -193,7 +193,7 @@ char
 
 	}
 
-	return -1;
+	return NULL;
 
 }
 

@@ -32,7 +32,9 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	struct sockaddr_in servaddr;
 
 	if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+
 		perror("socket");
+
 	}
 
 	servaddr.sin_family = AF_INET;
@@ -44,17 +46,21 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	int fd;
 
 	if((fd = open(fname, O_RDONLY)) < 0) {
+
 		printf("Couldn't open file: invalid filename/insufficient permissions?\n");
 		printf("Quitting\n");
 		return -1;
+
 	}
 
 	struct stat st;
 
 	if(fstat(fd, &st) < 0) {
+
 		printf("Couldn't retrieve file information\n");
 		printf("Quitting\n");
 		return -1;
+
 	}
 
 	/* number of 1K blocks file will be sent in */
@@ -318,9 +324,6 @@ receive_files(int port, char *ident)
 
 				if((*recv_mesg).type == 0) {
 
-					/* save the identity of the fellow sending us the file */
-					//sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
-
 					/* save the details of the file */
 					nblk = (*recv_mesg).blkno;
 					sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
@@ -329,9 +332,6 @@ receive_files(int port, char *ident)
 						sender_ident, 
 						fname, 
 						nblk);
-
-					/* create the file locally */
-					//fd = open(fname, O_CREAT|O_WRONLY, 0644);
 
 					/* create a new download */
 					if((dman_stat = new_download(sender_ident, fname, nblk, lblk, 1)) < 0) {
@@ -349,27 +349,22 @@ receive_files(int port, char *ident)
 				} else if((*recv_mesg).type == 3) {
 
 					/* check if the block was the requested block */
-					//if((*recv_mesg).blkno == blkno) {
 					if((*recv_mesg).blkno == get_blkno(sender_ident)) {
 	
-						//if(blkno == nblk) {
 						if(get_blkno(sender_ident) == get_nblk(sender_ident)) {
 	
 							/* write the last block and wrap up */
-							//write(fd, (*recv_mesg).body, lblk);
 							write(get_fd(sender_ident), (*recv_mesg).body, get_lblk(sender_ident));
 					
 							/* file transfer finished */
 							(*send_mesg).type = 4;
-							//sprintf((*send_mesg).body, "%s", fname);
 							sprintf((*send_mesg).body, "%s", get_fname(sender_ident));
 	
 						} else {
 				
 							/* write the block, ask for next block, etc. */
-							//write(fd, (*recv_mesg).body, 1024);
 							write(get_fd(sender_ident), (*recv_mesg).body, 1024);
-							//blkno += 1;
+					
 							inc_blkno(sender_ident);
 
 							(*send_mesg).type = 2;
@@ -385,7 +380,6 @@ receive_files(int port, char *ident)
 				}
 
 				/* build response */
-				//(*send_mesg).blkno = blkno;
 				(*send_mesg).blkno = get_blkno(sender_ident);
 				sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
 
@@ -410,7 +404,7 @@ receive_files(int port, char *ident)
 
 					finish_download(sender_ident);	
 					
-					return 0;
+					//return 0;
 
 				}
 
