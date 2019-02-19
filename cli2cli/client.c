@@ -93,6 +93,10 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 	FD_SET(sockfd, &recvset);
 
+	/* to see how efficient this protocol is, */
+	int listens_sent = 0;	/* number of listen messages send */
+	int listens_disc = 0;	/* number of listens for which we got no response */
+
 	while(1) {
 
 		/**
@@ -120,18 +124,24 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 		}
 
+		listens_sent += 1;
+
 		/**
-		 * Polling the server for messages seems to be necessary.
-		 * Without it if a 'listen' message isn't responded to by
-		 * the server, the recvfrom() blocks the client execution
-		 * and the program goes into a limbo. 
-		 * We wait 100us for a response and if there isn't any we 
-		 * resend the 'listen' message.
+		 * The way the client and server communicate with each other 
+		 * means if recvfrom() blocks, it means the server didn't respond
+		 * to the listen message we sent, and it will block indefinitely.
+		 * Thus, we have to ensure that recvfrom() NEVER blocks.
+		 * 
+		 * We poll the socket fd using select() to ensure recvfrom() is 
+		 * only called when it won't block. The timeout is 100us. If
+		 * sockfd isn't ready to recvfrom without blocking within this 
+	 	 * interval, we resend the listen message.
 		 *
-		 * Reducing the interval below 100us could flood the 
-		 * server with an excessive amount of 'listen' messages.
-		 *
-		 * Polling is achieved by select()
+		 * Announcing our presence using listen messages is necessary 
+		 * because the server isn't going to remember our address.
+		 * 
+		 * Reducing the timeout below 100us could flood the server with 
+		 * an excessive amount of listen messages.
 		 */
 		/**
 		 * Time taken to transfer a ~945MiB file between two clients via
@@ -150,6 +160,9 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 			/* no response, ping again... */
 			/* put sockfd back in our fdset */
 			FD_SET(sockfd, &recvset);
+
+			/* the listen we sent didn't get a response */
+			listens_disc += 1;
 
 		} else {
 
@@ -183,6 +196,12 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 					/* file transfer completed */
 					printf("File transfer completed.\n");
+					close(fd);
+
+					/* print statistics */
+					printf("'Listen' messages sent: %d\n", listens_sent);
+					printf("'Listen' messeges wasted: %d\n", listens_disc);
+
 					return 0;
 
 				}
