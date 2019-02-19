@@ -104,7 +104,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * todo: Try rewriting this with poll() 
 		 */
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 250;
+		timeout.tv_usec = 0;
 
 		/* listen for messages that are addressed to us */
 		if(sendto(	
@@ -125,8 +125,8 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * Without it if a 'listen' message isn't responded to by
 		 * the server, the recvfrom() blocks the client execution
 		 * and the program goes into a limbo. 
-		 * We wait 250 microseconds for a response, and if there 
-		 * isn't any, we resend the 'listen' message.
+		 * We check for a response, and if there isn't any, we 
+		 * resend the 'listen' message.
 		 *
 		 * Polling is achieved by select()
 		 */
@@ -195,7 +195,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 		}
 
-
 	}
 	
 	close(fd);
@@ -248,7 +247,7 @@ receive_files(int port, char *ident)
 	while(1) {
 
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 250;
+		timeout.tv_usec = 0;
 	
 		if(sendto(	
 			sockfd, 
