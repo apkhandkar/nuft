@@ -104,8 +104,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * On Linux, it seems to modify timeout to reflect the amount of
 		 * time not slept; on Mac OSX/BSD it keeps timeout unchanged but 
 		 * advises programmers not to rely on that fact...!!!
-		 * 
-		 * todo: Try rewriting this with poll() 
 		 */
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 100;

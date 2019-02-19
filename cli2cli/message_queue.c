@@ -145,6 +145,7 @@ delete_from_queue(int at_index)
 			}
 			
 			return 0;
+
 		}
 
 		index += 1;
