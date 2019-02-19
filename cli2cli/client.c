@@ -104,7 +104,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 * todo: Try rewriting this with poll() 
 		 */
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 300;
+		timeout.tv_usec = 250;
 
 		/* listen for messages that are addressed to us */
 		if(sendto(	
@@ -191,6 +191,23 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 				}
 
+				printf("sendto (sender) wasn't blocked\n");
+
+				/* if we've send a block, check for receipt acknowledgement */
+				/*
+				n = recvfrom(	
+					sockfd, 
+					recv_mesg, 
+					sizeof(struct msg), 
+					0, 
+					(struct sockaddr*)&servaddr, 
+					&len);	
+				
+				 we got acknowledgement 
+				if((*recv_mesg).type == 5) {
+				}
+				*/
+
 			}
 
 		}
@@ -247,7 +264,7 @@ receive_files(int port, char *ident)
 	while(1) {
 
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 300;
+		timeout.tv_usec = 250;
 	
 		if(sendto(	
 			sockfd, 

@@ -63,7 +63,8 @@ main(int argc, char **argv)
 			 * These are client-to-client messages.
 			 *
 			 * Our job as the server is to simply add them to the
-			 * message queue.
+			 * message queue and send an acknowledgement of this
+			 * to the client.
 			 *
 			 * A client-to-client message will [roughly] follow
 			 * this path:
@@ -89,6 +90,8 @@ main(int argc, char **argv)
 					(*recv_mesg).blkno);
 
 			}
+
+			/* send acknowledgement to client */
 
 		} else if((*recv_mesg).type == 1) {
 
