@@ -130,6 +130,13 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 *
 		 * Polling is achieved by select()
 		 */
+		/**
+		 * Time taken to transfer a ~945MiB file between two clients via
+		 * relay server on the same device:
+		 * 
+		 *	select() waits 250us: ~ 7'30" (unacceptable)	
+		 * 	select() waits 100us: ~ 4'01" (somewhat okay)
+		 */
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
 			perror("select");
@@ -190,22 +197,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 					return -1;
 
 				}
-
-
-				/* if we've send a block, check for receipt acknowledgement */
-				/*
-				n = recvfrom(	
-					sockfd, 
-					recv_mesg, 
-					sizeof(struct msg), 
-					0, 
-					(struct sockaddr*)&servaddr, 
-					&len);	
-				
-				 we got acknowledgement 
-				if((*recv_mesg).type == 5) {
-				}
-				*/
 
 			}
 
