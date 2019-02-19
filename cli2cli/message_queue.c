@@ -1,6 +1,5 @@
 #include "cli2cli.h"
 #include "message_queue.h"
-#include "printmsg.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -161,33 +160,3 @@ delete_from_queue(int at_index)
 	
 	return -1;
 }
-
-/**
- * Print queue in the desired direction
- * 0 - Forwards
- * 1 - Backwards (to test integrity of backlinks)
- */
-/*
-void
-print_queue(int direction)
-{
-	struct mq_entry *temp =
-		direction ?
-			TAIL :
-			HEAD ;
-
-	printf("----------Printing Message Queue----------\n");
-	while(temp != NULL) {
-
-		printf("\n");
-		printmsg(&(*temp).message);
-		printf("\n");
-
-		temp =
-			direction ? 
-				((*temp).prev_entry) :
-				((*temp).next_entry) ;
-	}	
-	printf("---------/Printing Message Queue----------\n");
-}
-*/
