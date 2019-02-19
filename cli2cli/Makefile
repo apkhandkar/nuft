@@ -7,5 +7,5 @@ server: server.c message_queue.o message_queue.h cli2cli.h
 downloadman.o: downloadman.c downloadman.h
 	$(CC) -c downloadman.c
 
-message_queue.o : message_queue.c message_queue.h printmsg.o cli2cli.h printmsg.h 
+message_queue.o : message_queue.c message_queue.h cli2cli.h 
 	$(CC) -c message_queue.c
