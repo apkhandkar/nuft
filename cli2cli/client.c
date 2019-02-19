@@ -150,7 +150,8 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 */
 		/**
 		 * Time taken to transfer a ~945MiB file between two clients via
-		 * relay server on the same device:
+		 * relay server on the same device (when the server is only 
+		 * dealing with this one file):
 		 * 
 		 *	select() waits 250us: ~ 00:07:30 (unacceptable)	
 		 * 	select() waits 100us: ~ 00:04:01 (somewhat okay)
@@ -205,7 +206,7 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 					/* print statistics */
 					printf("'Listen' messages sent: %d\n", listens_sent);
-					printf("'Listen' messeges wasted: %d\n", listens_disc);
+					printf("'Listen' messages wasted: %d\n", listens_disc);
 
 					return 0;
 

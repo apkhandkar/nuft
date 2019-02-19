@@ -10,6 +10,7 @@
 int 
 main(int argc, char **argv)
 {
+
 	/* default port is 8080 */
 	int port = 8080;
 	/* unless specified by the user as a command-line argument */
@@ -20,8 +21,10 @@ main(int argc, char **argv)
 	struct sockaddr_in servaddr, cliaddr;
 
 	if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+
 		perror("socket");
 		return -1;
+
 	}
 
 	servaddr.sin_family = AF_INET;
@@ -29,8 +32,10 @@ main(int argc, char **argv)
 	servaddr.sin_port = htons(port);
 
 	if(bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+
 		perror("bind");
 		return -1;
+
 	}
 
 	printf("Started relay server at port %d\n\n", port);
@@ -147,4 +152,5 @@ main(int argc, char **argv)
 	}
 	
 	return 0;	
+
 }

@@ -242,6 +242,14 @@ finish_download(char *from)
 				free(temp);
 
 			}
+	
+			temp = HEAD;
+			while(temp != NULL) {
+
+				TAIL = temp;
+				temp = (*temp).next;
+
+			}	
 
 			return 0;		
 

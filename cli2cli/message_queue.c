@@ -4,23 +4,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* initially, the queue is empty */
 int queue_empty = 1;
 
 struct mq_entry *HEAD, *TAIL;
 
-/**
- * Adds message to queue
- */
 int
 add_to_queue(struct msg *recv_mesg)
 {
 	/* if the queue is empty */
 	if(queue_empty) {
+
 		/* create the first entry */
-		if((HEAD = (struct mq_entry*) malloc(sizeof(struct mq_entry))) == NULL) {
-			printf("Couldn't allocate\n");
-		}
+		HEAD = (struct mq_entry*) malloc(sizeof(struct mq_entry));
 
 		(*HEAD).prev_entry = NULL;
 		(*HEAD).next_entry = NULL;
@@ -31,7 +26,9 @@ add_to_queue(struct msg *recv_mesg)
 
 		queue_empty = 0;
 		return 0;
+
 	}
+
 	/* if the queue is non-empty */
 	struct mq_entry *temp = (struct mq_entry*) malloc(sizeof(struct mq_entry));
 
@@ -45,46 +42,49 @@ add_to_queue(struct msg *recv_mesg)
 	TAIL = temp;
 
 	return 0;
+
 }
 
-/**
- * Gets the index of the first message in the queue that is addressed to
- * 'to_ident'
- */
 int
 get_mqindex_to(char *to_ident)
 {
+
 	struct mq_entry *temp = HEAD;
 	char from[64], to[64];
 	int index = 0;
 
 	while(temp != NULL) {
+
 		sscanf((*temp).message.ids, "%s %s", &from, &to);
 
 		if(!strcmp(to, to_ident)) {
+
 			return index;
+
 		}
 
 		index += 1;
 		temp = (*temp).next_entry;
+
 	}
 	
 	return -1;
+
 }
 
-/**
- * Returns a pointer to the message at specified index
- */
 struct msg
 *get_message(int at_index)
 {
+
 	struct mq_entry *temp = HEAD;
 	int index = 0;
 
 	while(temp != NULL) {
 
 		if(index == at_index) {
+
 			return &(*temp).message;
+
 		}
 
 		index += 1;
@@ -92,14 +92,13 @@ struct msg
 	}
 	
 	return NULL;
+
 }
 
-/**
- * Deletes the message at specified index from queue
- */
 int
 delete_from_queue(int at_index)
 {
+
 	struct mq_entry *temp = HEAD, *copy;
 	int index = 0;
 
@@ -142,6 +141,15 @@ delete_from_queue(int at_index)
 				free(temp);
 
 			}
+
+			/* recalibrate the TAIL */
+			temp = HEAD;
+			while(temp != NULL) {
+
+				TAIL = temp;
+				temp = (*temp).next_entry;
+
+			}	
 			
 			return 0;
 
@@ -150,13 +158,7 @@ delete_from_queue(int at_index)
 		index += 1;
 		temp = (*temp).next_entry;
 	}
-
-	/* recalibrate the TAIL */
-	temp = HEAD;
-	while(temp != NULL) {
-		TAIL = temp;
-		temp = (*temp).next_entry;
-	}
 	
 	return -1;
+
 }
