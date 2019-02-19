@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "cli2cli.h"
+#include "downloadman.h"
 
 int 
 send_file(int port, char *fname, char *my_ident, char *to_ident) 
@@ -271,6 +272,8 @@ receive_files(int port, char *ident)
 
 	FD_SET(sockfd, &recvset);
 
+	int dman_stat;
+
 	while(1) {
 
 		timeout.tv_sec = 0;
@@ -310,11 +313,14 @@ receive_files(int port, char *ident)
 					(struct sockaddr*)&servaddr, 
 					&len);	
 
+				/* save the identity of the fellow sending us the file */
+				sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
+
 				if((*recv_mesg).type == 0) {
-					blkno = 1;	
 
 					/* save the identity of the fellow sending us the file */
-					sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
+					//sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
+
 					/* save the details of the file */
 					nblk = (*recv_mesg).blkno;
 					sscanf((*recv_mesg).body, "%d %s", &lblk, &fname);
@@ -325,7 +331,15 @@ receive_files(int port, char *ident)
 						nblk);
 
 					/* create the file locally */
-					fd = open(fname, O_CREAT|O_WRONLY, 0644);			
+					//fd = open(fname, O_CREAT|O_WRONLY, 0644);
+
+					/* create a new download */
+					if((dman_stat = new_download(sender_ident, fname, nblk, lblk, 1)) < 0) {
+			
+						printf("dman failed to create new download\n");
+						return -1;
+				
+					}	
 	
 					/* send acknowledgement to the sender */
 					/* i.e., ask for block #1 of the file */
@@ -335,22 +349,28 @@ receive_files(int port, char *ident)
 				} else if((*recv_mesg).type == 3) {
 
 					/* check if the block was the requested block */
-					if((*recv_mesg).blkno == blkno) {
+					//if((*recv_mesg).blkno == blkno) {
+					if((*recv_mesg).blkno == get_blkno(sender_ident)) {
 	
-						if(blkno == nblk) {
+						//if(blkno == nblk) {
+						if(get_blkno(sender_ident) == get_nblk(sender_ident)) {
 	
 							/* write the last block and wrap up */
-							write(fd, (*recv_mesg).body, lblk);
-
+							//write(fd, (*recv_mesg).body, lblk);
+							write(get_fd(sender_ident), (*recv_mesg).body, get_lblk(sender_ident));
+					
 							/* file transfer finished */
 							(*send_mesg).type = 4;
-							sprintf((*send_mesg).body, "%s", fname);
+							//sprintf((*send_mesg).body, "%s", fname);
+							sprintf((*send_mesg).body, "%s", get_fname(sender_ident));
 	
 						} else {
 				
 							/* write the block, ask for next block, etc. */
-							write(fd, (*recv_mesg).body, 1024);
-							blkno += 1;
+							//write(fd, (*recv_mesg).body, 1024);
+							write(get_fd(sender_ident), (*recv_mesg).body, 1024);
+							//blkno += 1;
+							inc_blkno(sender_ident);
 
 							(*send_mesg).type = 2;
 
@@ -365,7 +385,8 @@ receive_files(int port, char *ident)
 				}
 
 				/* build response */
-				(*send_mesg).blkno = blkno;
+				//(*send_mesg).blkno = blkno;
+				(*send_mesg).blkno = get_blkno(sender_ident);
 				sprintf((*send_mesg).ids, "%s %s", ident, sender_ident);
 
 				/* send response */
@@ -384,8 +405,13 @@ receive_files(int port, char *ident)
 
 				/* if file was sent, we're done */
 				if((*send_mesg).type == 4) {
+
 					printf("Finished transfer.\n");
+
+					finish_download(sender_ident);	
+					
 					return 0;
+
 				}
 
 			}

@@ -10,7 +10,7 @@ int dm_initialised = 0;
 struct download *HEAD, *TAIL;
 
 int
-new_download(char *from, char *fname)
+new_download(char *from, char *fname, int nblk, int lblk, int blkno)
 {
 
 	int got_fd;
@@ -28,6 +28,9 @@ new_download(char *from, char *fname)
 			HEAD = (struct download*) malloc(sizeof(struct download));
 	
 			(*HEAD).fd = got_fd;
+			(*HEAD).nblk = nblk;
+			(*HEAD).lblk = lblk;
+			(*HEAD).blkno = 1;
 			strcpy((*HEAD).from, from);
 			strcpy((*HEAD).fname, fname);
 
@@ -44,6 +47,9 @@ new_download(char *from, char *fname)
 			temp  = (struct download*) malloc(sizeof(struct download));
 
 			(*temp).fd = got_fd;
+			(*temp).nblk = nblk;
+			(*temp).lblk = lblk;
+			(*temp).blkno = 1;
 			strcpy((*temp).from, from);
 			strcpy((*temp).fname, fname);
 
@@ -72,6 +78,114 @@ get_fd(char *from)
 		if(!strcmp((*temp).from, from)) {
 
 			return (*temp).fd;
+
+		}
+
+		temp = (*temp).next;	
+
+	}
+
+	return -1;
+
+}
+
+int
+get_nblk(char *from)
+{
+
+	struct download *temp = HEAD;
+
+	while(temp != NULL) {
+
+		if(!strcmp((*temp).from, from)) {
+
+			return (*temp).nblk;
+
+		}
+
+		temp = (*temp).next;	
+
+	}
+
+	return -1;
+
+}
+
+int
+get_lblk(char *from)
+{
+
+	struct download *temp = HEAD;
+
+	while(temp != NULL) {
+
+		if(!strcmp((*temp).from, from)) {
+
+			return (*temp).lblk;
+
+		}
+
+		temp = (*temp).next;	
+
+	}
+
+	return -1;
+
+}
+
+int
+get_blkno(char *from)
+{
+
+	struct download *temp = HEAD;
+
+	while(temp != NULL) {
+
+		if(!strcmp((*temp).from, from)) {
+
+			return (*temp).blkno;
+
+		}
+
+		temp = (*temp).next;	
+
+	}
+
+	return -1;
+
+}
+
+void
+inc_blkno(char *from)
+{
+
+	struct download *temp = HEAD;
+
+	while(temp != NULL) {
+
+		if(!strcmp((*temp).from, from)) {
+
+			(*temp).blkno += 1;
+
+		}
+
+		temp = (*temp).next;	
+
+	}
+
+}
+
+char
+*get_fname(char *from)
+{
+
+	struct download *temp = HEAD;
+
+	while(temp != NULL) {
+
+		if(!strcmp((*temp).from, from)) {
+
+			return &((*temp).fname);
 
 		}
 
