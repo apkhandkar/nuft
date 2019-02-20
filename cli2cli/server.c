@@ -67,11 +67,6 @@ main(int argc, char **argv)
 
 			/**
 			 * These are client-to-client messages.
-			 *
-			 * Our job as the server is to simply add them to the
-			 * message queue. 
-			 * A client-to-client message will [roughly] follow
-			 * this path:
 			 * 
 			 * Client [Sender] -->
 			 *     Server =(adds to)=>
@@ -103,9 +98,6 @@ main(int argc, char **argv)
 			 * if our queue contains any messages addressed to him,
 			 * and if so, we send him the first message in the queue
 			 * for him. 
-			 *
-			 * If there are no messages for the client, we do not 
-			 * send any response.
 			 */
 
 			/* retrieve client identity */
