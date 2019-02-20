@@ -115,7 +115,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 100;
 
-		skip_send: /* if there wasn't any message to send */
 		/* listen for messages that are addressed to us */
 		if(sendto(	
 			sockfd,
@@ -157,26 +156,25 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 		 *	select() waits 250us: ~ 00:07:30 (unacceptable)	
 		 * 	select() waits 100us: ~ 00:04:01 (somewhat okay)
 		 */
-		/*
 		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 
 			perror("select");
 			return -1;
 
-		} else if(are_ready == 0) { */
+		} else if(are_ready == 0) {
 
 			/* no response, ping again... */
 			/* put sockfd back in our fdset */
-			//FD_SET(sockfd, &recvset);
+			FD_SET(sockfd, &recvset);
 
 			/* the listen we sent didn't get a response */
-			//listens_disc += 1;
+			listens_disc += 1;
 
-		//} else {
+		} else {
 
 			/* an fd from our fdset is ready to be read from */
 			/* although sockfd is its only member, check to be sure */
-			//if(FD_ISSET(sockfd, &recvset)) {
+			if(FD_ISSET(sockfd, &recvset)) {
 	
 				n = recvfrom(	
 					sockfd, 
@@ -212,11 +210,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 
 					return 0;
 
-				} else if((*recv_mesg).type == 6) {
-	
-					/* there was nothing for us, send a listen message again */
-					goto skip_send;
-					
 				}
 
 				/* send response */
@@ -232,11 +225,10 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 					return -1;
 
 				}
-		
 
-			//}
+			}
 
-		//}
+		}
 
 	}
 	
@@ -293,8 +285,7 @@ receive_files(int port, char *ident)
 
 		timeout.tv_sec = 0;
 		timeout.tv_usec = 100;
-
-		skip_send:	
+	
 		if(sendto(	
 			sockfd, 
 			list_mesg, 
@@ -308,7 +299,7 @@ receive_files(int port, char *ident)
 
 		}
 
-		/*if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
+		if((are_ready = select((sockfd+1), &recvset, NULL, NULL, &timeout)) < 0) {
 			
 			perror("select");
 			return -1;
@@ -318,8 +309,8 @@ receive_files(int port, char *ident)
 			FD_SET(sockfd, &recvset);
 
 		} else {
-				
-			if(FD_ISSET(sockfd, &recvset)) {*/
+
+			if(FD_ISSET(sockfd, &recvset)) {
 
 				n = recvfrom(	
 					sockfd, 
@@ -328,7 +319,7 @@ receive_files(int port, char *ident)
 					0, 
 					(struct sockaddr*)&servaddr, 
 					&len);	
-				
+
 				/* save the identity of the fellow sending us the file */
 				sscanf((*recv_mesg).ids, "%s %s", &sender_ident, &my_ident);
 
@@ -387,10 +378,6 @@ receive_files(int port, char *ident)
 						(*send_mesg).type = 2;
 					}
 					
-				} else if((*recv_mesg).type == 6) {
-
-					goto skip_send;
-
 				}
 
 				/* build response */
@@ -422,9 +409,9 @@ receive_files(int port, char *ident)
 
 				}
 
-			//}
+			}
 
-		//}
+		}
 
 	}
 

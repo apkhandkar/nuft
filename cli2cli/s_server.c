@@ -41,7 +41,6 @@ main(int argc, char **argv)
 	printf("Started relay server at port %d\n\n", port);
 	
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
-	struct msg *send_mesg = (struct msg*) malloc(sizeof(struct msg));
 
 	int len;
 	int n;
@@ -144,22 +143,7 @@ main(int argc, char **argv)
 			} else {
 
 				/* there were no messages addressed to the client in the queue */
-	
-				/* respond to the client with a 'nothing for you' message */
-				(*send_mesg).type = 6;
-				
-				if(sendto(	
-					sockfd, 
-					send_mesg,	
-					sizeof(struct msg), 
-					0, 
-					(struct sockaddr*)&cliaddr, 
-					len) < 0) {
-
-					perror("sendto");
-					return -1;
-
-				}
+				/* do nothing; the client will come back again to check anyway */
 
 			}
 
