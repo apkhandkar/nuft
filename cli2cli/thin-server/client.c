@@ -294,7 +294,7 @@ receive_files(int port, char *ident)
 					
 		} else if((*recv_mesg).type == 6) {
 
-			continue;			
+			continue;
 
 		}
 
