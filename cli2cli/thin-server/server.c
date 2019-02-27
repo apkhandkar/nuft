@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -42,12 +43,15 @@ main(int argc, char **argv)
 	
 	struct msg *recv_mesg = (struct msg*) malloc(sizeof(struct msg));
 	struct msg *send_mesg = (struct msg*) malloc(sizeof(struct msg));
+	
+	struct msg *temp_mesg = (struct msg*) malloc(sizeof(struct msg));
 
 	int len;
 	int n;
 	int msgq_index;
 
 	char id1[64], id2[64], fname[512];
+	char temp_from[64], temp_to[64];
 	int lblk;
 
 	while(1) {
@@ -69,12 +73,12 @@ main(int argc, char **argv)
 			 * These are client-to-client messages.
 			 * 
 			 * Client [Sender] -->
-			 *     Server =(adds to)=>
-			 * 	       Server Message Queue 
-		  	 *		       =(retrieved from)=> Server -->
-			 * 			       Client [Recipient]
+			 * 		Server -->
+			 * 			Client [Recipient]
 			 */
-			add_to_queue(recv_mesg);
+
+			/* save message temporarily */
+			memcpy(temp_mesg, recv_mesg, sizeof(struct msg));
 
 			/* announce new transfers */
 			if((*recv_mesg).type == 0) {
@@ -92,27 +96,21 @@ main(int argc, char **argv)
 
 		} else if((*recv_mesg).type == 1) {
 
-			/**
-			 * A client has sent us a 'listening' message.
-			 * With it, he will send his identity. We have to check
-			 * if our queue contains any messages addressed to him,
-			 * and if so, we send him the first message in the queue
-			 * for him. 
-			 */
-
 			/* retrieve client identity */
 			sscanf((*recv_mesg).ids, "%s", id1);
-	
-			/* get the first message from the queue addressed to the client */
-			/* if such a message exists, send it to the client */
-			if((msgq_index = get_mqindex_to(id1)) >= 0) {
 
-				if(sendto(	
-					sockfd, 
-					get_message(msgq_index),	/* retrieve the message from queue */ 
-					sizeof(struct msg), 
-					0, 
-					(struct sockaddr*)&cliaddr, 
+			/* check if the message we are storing is addressed to this client */
+			sscanf((*temp_mesg).ids, "%s %s", temp_from, temp_to);
+
+			if(!strcmp(temp_to, id1)) {
+
+				/* send this message to the client */
+				if(sendto(
+					sockfd,
+					temp_mesg,
+					sizeof(struct msg),
+					0,
+					(struct sockaddr*)&cliaddr,
 					len) < 0) {
 
 					perror("sendto");
@@ -121,17 +119,16 @@ main(int argc, char **argv)
 				}
 
 				/* announce completed transfers */
-				if((*(get_message(msgq_index))).type == 4) {
+				if((*temp_mesg).type == 4) {
 
-					sscanf((*(get_message(msgq_index))).ids, "%s %s", id1, id2);
-					sscanf((*(get_message(msgq_index))).body, "%s", fname);
+					sscanf((*temp_mesg).ids, "%s %s", id1, id2);
+					sscanf((*temp_mesg).body, "%s", fname);
 		
 					printf("[Finished Transfer] from:%s to:%s file:%s\n", id2, id1, fname);
 
-				}			
+				}
 
-				/* delete the message we just sent from the message queue */
-				delete_from_queue(msgq_index);
+	
 
 			} else {
 
@@ -153,9 +150,9 @@ main(int argc, char **argv)
 
 				}
 
-			}
+			} 
 
-		}
+		} 
 		
 	}
 	
