@@ -6,7 +6,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "cli2cli.h"
-#include "message_queue.h"
 
 int 
 main(int argc, char **argv)
@@ -128,12 +127,9 @@ main(int argc, char **argv)
 
 				}
 
-	
-
 			} else {
 
 				/* there were no messages addressed to the client in the queue */
-	
 				/* respond to the client with a 'nothing for you' message */
 				(*send_mesg).type = 6;
 				
