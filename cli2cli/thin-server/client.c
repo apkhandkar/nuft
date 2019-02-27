@@ -33,7 +33,6 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 	}
 
 	servaddr.sin_family = AF_INET;
-	/* servaddr.sin_addr.s_addr = INADDR_ANY; */
 	if(inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr) < 0) {
 
 		printf("Invalid address\n");
@@ -186,7 +185,6 @@ receive_files(int port, char *ident)
 	}
 
 	servaddr.sin_family = AF_INET;
-	/* servaddr.sin_addr.s_addr = INADDR_ANY; */
 	if(inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr) < 0) {
 
 		printf("Invalid address\n");
