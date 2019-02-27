@@ -8,4 +8,9 @@ struct msg {
 	char body[1024];
 };
 
+struct ident {
+	char addr[16];
+	int port;
+};
+
 #endif

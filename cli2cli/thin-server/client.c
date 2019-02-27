@@ -13,7 +13,13 @@
 #include "downloadman.h"
 
 int 
-send_file(int port, char *fname, char *my_ident, char *to_ident) 
+send_file(
+	int port, 
+	char *fname, 
+	char *my_ident, 
+	char *to_ident, 
+	struct ident *_my_ident, 
+	struct ident *_to_ident) 
 {
 
 	printf("Sending file: %s\n", fname);
@@ -169,7 +175,9 @@ send_file(int port, char *fname, char *my_ident, char *to_ident)
 }
 
 int
-receive_files(int port, char *ident)
+receive_files(
+	int port, 
+	char *ident)
 {
 
 	printf("Listening for files via relayserver at port %d as @%s\n", port, ident);
@@ -344,7 +352,7 @@ main(int argc, char **argv)
 
 		}
 
-		send_file(atoi(argv[2]), argv[3], argv[4], argv[5]);
+		send_file(atoi(argv[2]), argv[3], argv[4], argv[5], NULL, NULL);
 
 	} else if(!strcmp(argv[1], "-r") && argc == 4) {
 
