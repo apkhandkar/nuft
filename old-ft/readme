@@ -1,0 +1,7 @@
+usage:  client <port> <file> [<saveas>]
+        server <port>
+
+notes:  - if client process is aborted before download is completed, the download can be resumed
+          from point of abortion next time same file is downloaded
+        - if 3rd argument for client isn't specified, the file downloaded is saved with its 
+          original filename as on the server
